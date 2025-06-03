@@ -2,9 +2,10 @@
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import OutfitCard from "../components/OutfitCard";
+import { useState } from "react";
 
 const Index = () => {
-  const outfits = [
+  const [outfits, setOutfits] = useState([
     {
       id: 1,
       image: "/lovable-uploads/176d2b4f-3d7f-43f1-99ae-f8e9126db858.png",
@@ -12,7 +13,8 @@ const Index = () => {
       avatar: "/lovable-uploads/7d5ad412-7ff9-4402-9c6c-2d6ad3adcb8d.png",
       likes: 234,
       description: "Casual chic for weekend brunch",
-      tags: ["casual", "weekend", "brunch"]
+      tags: ["casual", "weekend", "brunch"],
+      isLiked: false
     },
     {
       id: 2,
@@ -21,7 +23,8 @@ const Index = () => {
       avatar: "/lovable-uploads/80c97e5b-ca72-4e52-a1c9-cc639127684b.png",
       likes: 189,
       description: "Business casual with a pop of color",
-      tags: ["business", "professional", "colorful"]
+      tags: ["business", "professional", "colorful"],
+      isLiked: false
     },
     {
       id: 3,
@@ -30,7 +33,8 @@ const Index = () => {
       avatar: "/lovable-uploads/b374d91b-e45e-4183-992b-c173d8ab4170.png",
       likes: 156,
       description: "Elegant evening look",
-      tags: ["elegant", "evening", "formal"]
+      tags: ["elegant", "evening", "formal"],
+      isLiked: false
     },
     {
       id: 4,
@@ -39,9 +43,24 @@ const Index = () => {
       avatar: "/lovable-uploads/206d0354-8ae7-4012-9cbe-610c0b1aeead.png",
       likes: 312,
       description: "Summer vibes with layers",
-      tags: ["summer", "layers", "trendy"]
+      tags: ["summer", "layers", "trendy"],
+      isLiked: false
     }
-  ];
+  ]);
+
+  const handleLike = (id: number) => {
+    setOutfits(prevOutfits => 
+      prevOutfits.map(outfit => 
+        outfit.id === id 
+          ? { ...outfit, isLiked: !outfit.isLiked, likes: outfit.isLiked ? outfit.likes - 1 : outfit.likes + 1 }
+          : outfit
+      )
+    );
+  };
+
+  const handleSave = (id: number) => {
+    console.log(`Saved outfit ${id}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-pink-50 relative font-inter">
@@ -70,13 +89,13 @@ const Index = () => {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {outfits.map((outfit, index) => (
-                <div 
-                  key={outfit.id} 
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <OutfitCard {...outfit} />
-                </div>
+                <OutfitCard 
+                  key={outfit.id}
+                  outfit={outfit}
+                  onLike={() => handleLike(outfit.id)}
+                  onSave={() => handleSave(outfit.id)}
+                  delay={index * 100}
+                />
               ))}
             </div>
           </div>
