@@ -7,6 +7,14 @@ import { MapPin, Phone, Mail, Star } from 'lucide-react';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 
+// Fix for default markers in Leaflet
+delete (Icon.Default.prototype as any)._getIconUrl;
+Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
 interface Designer {
   id: string;
   name: string;
