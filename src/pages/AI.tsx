@@ -1,43 +1,81 @@
 
 import { useState } from "react";
-import { Sparkles, Wand2, Palette, Camera, Bot, Lightbulb } from "lucide-react";
+import { Sparkles, Wand2, Palette, Camera, Bot, Lightbulb, Upload, ImageIcon, Zap } from "lucide-react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const aiFeatures = [
   {
     id: 1,
-    icon: Wand2,
-    title: "Style Generator",
-    description: "Generate personalized outfit combinations based on your preferences",
-    color: "from-purple-500 to-pink-500"
+    icon: Camera,
+    title: "Take Photo",
+    description: "Capture your outfit and get AI-powered style analysis",
+    color: "from-blue-500 to-cyan-500",
+    action: "camera"
   },
   {
     id: 2,
-    icon: Palette,
-    title: "Color Matcher",
-    description: "Find perfect color combinations for your wardrobe",
-    color: "from-blue-500 to-cyan-500"
+    icon: Upload,
+    title: "Upload Photo",
+    description: "Upload existing photos for style recommendations",
+    color: "from-green-500 to-emerald-500",
+    action: "upload"
   },
   {
     id: 3,
-    icon: Camera,
-    title: "Outfit Analyzer",
-    description: "Upload photos and get AI-powered style recommendations",
-    color: "from-green-500 to-emerald-500"
+    icon: Wand2,
+    title: "Style Generator",
+    description: "Generate personalized outfit combinations with AI",
+    color: "from-purple-500 to-pink-500",
+    action: "generate"
   },
   {
     id: 4,
+    icon: Palette,
+    title: "Color Matcher",
+    description: "Find perfect color combinations for your wardrobe",
+    color: "from-orange-500 to-red-500",
+    action: "colors"
+  },
+  {
+    id: 5,
     icon: Bot,
     title: "Style Assistant",
-    description: "Chat with our AI stylist for personalized fashion advice",
-    color: "from-orange-500 to-red-500"
+    description: "Chat with our AI stylist for personalized advice",
+    color: "from-indigo-500 to-purple-500",
+    action: "chat"
+  },
+  {
+    id: 6,
+    icon: Zap,
+    title: "AI Generate",
+    description: "Let AI create stunning outfits from scratch",
+    color: "from-yellow-500 to-orange-500",
+    action: "ai-create"
   }
 ];
 
 const AI = () => {
   const [selectedFeature, setSelectedFeature] = useState<number | null>(null);
+  const { toast } = useToast();
+
+  const handleFeatureClick = (feature: typeof aiFeatures[0]) => {
+    setSelectedFeature(feature.id);
+    
+    const actionMessages = {
+      camera: { title: "Camera", description: "Opening camera to capture your outfit" },
+      upload: { title: "Upload", description: "Select a photo from your gallery" },
+      generate: { title: "Style Generator", description: "Creating personalized outfit combinations" },
+      colors: { title: "Color Matcher", description: "Analyzing perfect color combinations" },
+      chat: { title: "Style Assistant", description: "Starting conversation with AI stylist" },
+      "ai-create": { title: "AI Generator", description: "Let AI create a style for you" }
+    };
+
+    const message = actionMessages[feature.action as keyof typeof actionMessages];
+    toast(message);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-pink-50 relative font-inter">
@@ -60,12 +98,12 @@ const AI = () => {
                 </h1>
               </div>
               <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                Let artificial intelligence help you discover your perfect style and create stunning outfits
+                All-in-one AI-powered fashion tools to discover, create, and perfect your style
               </p>
             </div>
 
             {/* AI Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {aiFeatures.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
@@ -74,8 +112,8 @@ const AI = () => {
                     className={`bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
                       selectedFeature === feature.id ? 'ring-2 ring-pink-300' : ''
                     }`}
-                    onClick={() => setSelectedFeature(feature.id)}
-                    style={{ animationDelay: `${index * 150}ms` }}
+                    onClick={() => handleFeatureClick(feature)}
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${feature.color} flex items-center justify-center mb-4`}>
                       <Icon className="h-8 w-8 text-white" />
