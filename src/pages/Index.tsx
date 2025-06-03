@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
+import FloatingAddButton from "../components/FloatingAddButton";
 import OutfitCard from "../components/OutfitCard";
 import { useToast } from "@/hooks/use-toast";
 
@@ -161,6 +162,7 @@ const Index = () => {
         </main>
       </div>
 
+      <FloatingAddButton />
       <BottomNav activeTab="OOTD" />
     </div>
   );
