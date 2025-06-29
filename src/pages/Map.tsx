@@ -23,111 +23,82 @@ const Map = () => {
       // Set access token
       mapboxgl.default.accessToken = mapboxToken;
       
-      // Initialize map
+      // Initialize map with normal 2D view
       const map = new mapboxgl.default.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
-        projection: 'globe' as any,
-        zoom: 1.5,
-        center: [30, 15],
-        pitch: 45,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-74.5, 40], // Centered on New York area
+        zoom: 9
       });
 
       // Add navigation controls
       map.addControl(
-        new mapboxgl.default.NavigationControl({
-          visualizePitch: true,
-        }),
+        new mapboxgl.default.NavigationControl(),
         'top-right'
       );
 
-      // Add atmosphere and fog effects
-      map.on('style.load', () => {
-        map.setFog({
-          color: 'rgb(255, 255, 255)',
-          'high-color': 'rgb(200, 200, 225)',
-          'horizon-blend': 0.2,
-        });
-      });
+      // Add fullscreen control
+      map.addControl(new mapboxgl.default.FullscreenControl());
 
       // Sample fashion locations
       const fashionLocations = [
-        { name: "Paris Fashion Week", coordinates: [2.3522, 48.8566] },
-        { name: "Milan Fashion District", coordinates: [9.1900, 45.4642] },
-        { name: "New York Fashion Week", coordinates: [-74.0059, 40.7128] },
-        { name: "Tokyo Fashion Week", coordinates: [139.6917, 35.6895] },
-        { name: "London Fashion Week", coordinates: [-0.1276, 51.5074] }
+        { 
+          name: "SoHo Fashion District", 
+          coordinates: [-74.0027, 40.7230],
+          description: "Trendy boutiques and designer stores"
+        },
+        { 
+          name: "Fifth Avenue Shopping", 
+          coordinates: [-73.9776, 40.7614],
+          description: "Luxury flagship stores"
+        },
+        { 
+          name: "Brooklyn Fashion Scene", 
+          coordinates: [-73.9442, 40.6782],
+          description: "Indie designers and vintage shops"
+        },
+        { 
+          name: "Williamsburg Vintage", 
+          coordinates: [-73.9532, 40.7081],
+          description: "Curated vintage collections"
+        },
+        { 
+          name: "Chelsea Market Fashion", 
+          coordinates: [-74.0063, 40.7424],
+          description: "Local artisan boutiques"
+        }
       ];
 
       // Add markers for fashion locations
       fashionLocations.forEach(location => {
-        const popup = new mapboxgl.default.Popup({ offset: 25 }).setHTML(
-          `<div class="p-2">
-            <h3 class="font-semibold text-gray-800">${location.name}</h3>
-            <p class="text-sm text-gray-600">Fashion hotspot</p>
+        const popup = new mapboxgl.default.Popup({ 
+          offset: 25,
+          closeButton: false,
+          closeOnClick: false
+        }).setHTML(
+          `<div class="p-3">
+            <h3 class="font-semibold text-gray-800 mb-1">${location.name}</h3>
+            <p class="text-sm text-gray-600">${location.description}</p>
           </div>`
         );
 
-        new mapboxgl.default.Marker({
-          color: '#ec4899'
+        const marker = new mapboxgl.default.Marker({
+          color: '#ec4899',
+          scale: 0.8
         })
           .setLngLat(location.coordinates as [number, number])
           .setPopup(popup)
           .addTo(map);
-      });
 
-      // Rotation animation settings
-      const secondsPerRevolution = 240;
-      const maxSpinZoom = 5;
-      const slowSpinZoom = 3;
-      let userInteracting = false;
-      let spinEnabled = true;
-
-      // Spin globe function
-      function spinGlobe() {
-        const zoom = map.getZoom();
-        if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
-          let distancePerSecond = 360 / secondsPerRevolution;
-          if (zoom > slowSpinZoom) {
-            const zoomDif = (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
-            distancePerSecond *= zoomDif;
-          }
-          const center = map.getCenter();
-          center.lng -= distancePerSecond;
-          map.easeTo({ center, duration: 1000, easing: (n) => n });
-        }
-      }
-
-      // Event listeners for interaction
-      map.on('mousedown', () => {
-        userInteracting = true;
+        // Show popup on hover
+        marker.getElement().addEventListener('mouseenter', () => popup.addTo(map));
+        marker.getElement().addEventListener('mouseleave', () => popup.remove());
       });
-      
-      map.on('dragstart', () => {
-        userInteracting = true;
-      });
-      
-      map.on('mouseup', () => {
-        userInteracting = false;
-        spinGlobe();
-      });
-      
-      map.on('touchend', () => {
-        userInteracting = false;
-        spinGlobe();
-      });
-
-      map.on('moveend', () => {
-        spinGlobe();
-      });
-
-      // Start the globe spinning
-      spinGlobe();
 
       setShowTokenInput(false);
       toast({
         title: "Map Loaded",
-        description: "Fashion locations around the world are now visible",
+        description: "Fashion locations are now visible on the map",
       });
 
     } catch (error) {
@@ -135,6 +106,7 @@ const Map = () => {
       toast({
         title: "Map Error",
         description: "Failed to load the map. Please check your Mapbox token.",
+        variant: "destructive"
       });
     }
   };
@@ -146,6 +118,7 @@ const Map = () => {
       toast({
         title: "Token Required",
         description: "Please enter a valid Mapbox access token",
+        variant: "destructive"
       });
     }
   };
@@ -166,10 +139,10 @@ const Map = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h1 className="text-3xl font-playfair font-semibold text-gray-800 mb-2">
-                  Fashion World Map
+                  Fashion Map
                 </h1>
                 <p className="text-gray-600">
-                  Discover fashion hotspots and style inspiration from around the globe
+                  Discover local fashion stores and shopping destinations
                 </p>
               </div>
               
@@ -193,7 +166,7 @@ const Map = () => {
                   Enter Mapbox Access Token
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  To display the interactive world map, please enter your Mapbox access token.
+                  To display the interactive map, please enter your Mapbox access token.
                   You can get one free at <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:underline">mapbox.com</a>
                 </p>
                 <div className="flex gap-2 max-w-md mx-auto">
@@ -212,13 +185,13 @@ const Map = () => {
             )}
 
             {/* Map Container */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden" style={{ height: '500px' }}>
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative" style={{ height: '500px' }}>
               <div ref={mapContainer} className="w-full h-full" />
               {showTokenInput && (
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="h-16 w-16 text-pink-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Interactive world map will appear here</p>
+                    <p className="text-gray-600">Interactive map will appear here</p>
                   </div>
                 </div>
               )}
@@ -227,19 +200,19 @@ const Map = () => {
             {/* Fashion Locations Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
               {[
-                { name: "Paris", flag: "🇫🇷", description: "Fashion capital of the world" },
-                { name: "Milan", flag: "🇮🇹", description: "Luxury fashion hub" },
-                { name: "New York", flag: "🇺🇸", description: "Modern fashion trends" },
-                { name: "Tokyo", flag: "🇯🇵", description: "Street fashion innovation" },
-                { name: "London", flag: "🇬🇧", description: "Avant-garde fashion scene" },
+                { name: "SoHo", icon: "🏪", description: "Designer boutiques and galleries" },
+                { name: "Fifth Avenue", icon: "🏢", description: "Luxury flagship stores" },
+                { name: "Brooklyn", icon: "🎨", description: "Indie fashion and vintage" },
+                { name: "Williamsburg", icon: "👗", description: "Trendy local designers" },
+                { name: "Chelsea", icon: "🛍️", description: "Market fashion finds" },
               ].map((location, index) => (
                 <div
                   key={location.name}
-                  className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow animate-fade-in"
+                  className="bg-white rounded-xl p-4 shadow-md hover:shadow-lg transition-shadow animate-fade-in cursor-pointer"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{location.flag}</span>
+                    <span className="text-2xl">{location.icon}</span>
                     <div>
                       <h3 className="font-semibold text-gray-800">{location.name}</h3>
                       <p className="text-sm text-gray-600">{location.description}</p>
