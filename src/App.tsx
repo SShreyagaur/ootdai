@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import AI from "./pages/AI";
 import Wishlist from "./pages/Wishlist";
 import Map from "./pages/Map";
+import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/ai" element={<AI />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/map" element={<Map />} />
+          <Route path="/shop" element={<Shop />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
