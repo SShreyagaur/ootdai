@@ -1,63 +1,71 @@
 
-import { Home, ShoppingBag, Map, Bookmark, Sparkles, Camera } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Home, Sparkles, Heart, MapPin, ShoppingBag, Palette } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface BottomNavProps {
-  activeTab: string;
+  activeTab?: string;
 }
 
 const BottomNav = ({ activeTab }: BottomNavProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const tabs = [
-    { id: "OOTD", label: "OOTD", icon: Home, color: "text-pink-500", path: "/" },
-    { id: "Shop", label: "Shop", icon: ShoppingBag, color: "text-blue-500", path: "/shop" },
-    { id: "Map", label: "Map", icon: Map, color: "text-green-500", path: "/map" },
-    { id: "Wishlist", label: "Wishlist", icon: Bookmark, color: "text-purple-500", path: "/wishlist" },
-    { id: "AI", label: "AI", icon: Sparkles, color: "text-yellow-500", path: "/ai" },
-    { id: "StyleIt", label: "StyleIt", icon: Camera, color: "text-indigo-500", path: "/styleit" },
-  ];
-
-  const handleTabClick = (tab: typeof tabs[0]) => {
-    navigate(tab.path);
+  const getActiveTab = () => {
+    if (activeTab) return activeTab;
+    
+    switch (location.pathname) {
+      case '/':
+        return 'Home';
+      case '/ai':
+        return 'AI';
+      case '/wishlist':
+        return 'Wishlist';
+      case '/map':
+        return 'Map';
+      case '/shop':
+        return 'Shop';
+      case '/styleit':
+        return 'StyleIt';
+      default:
+        return 'Home';
+    }
   };
 
+  const currentTab = getActiveTab();
+
+  const navItems = [
+    { id: 'Home', icon: Home, label: 'Home', path: '/' },
+    { id: 'AI', icon: Sparkles, label: 'AI', path: '/ai' },
+    { id: 'Wishlist', icon: Heart, label: 'Wishlist', path: '/wishlist' },
+    { id: 'StyleIt', icon: Palette, label: 'Style It', path: '/styleit' },
+    { id: 'Map', icon: MapPin, label: 'Map', path: '/map' },
+    { id: 'Shop', icon: ShoppingBag, label: 'Shop', path: '/shop' },
+  ];
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-pink-100">
-      <div className="max-w-md mx-auto px-2 py-2">
-        <div className="flex justify-between items-center">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabClick(tab)}
-                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-all duration-200 ${
-                  isActive 
-                    ? 'bg-pink-50 transform scale-105' 
-                    : 'hover:bg-gray-50'
-                }`}
-              >
-                <Icon
-                  className={`h-5 w-5 mb-1 transition-colors ${
-                    isActive ? tab.color : 'text-gray-400'
-                  }`}
-                />
-                <span
-                  className={`text-xs font-medium transition-colors ${
-                    isActive ? tab.color : 'text-gray-600'
-                  }`}
-                >
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
+      <div className="flex justify-around items-center max-w-md mx-auto">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = currentTab === item.id;
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+                isActive
+                  ? 'text-pink-600 bg-pink-50'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Icon className={`h-5 w-5 mb-1 ${isActive ? 'text-pink-600' : ''}`} />
+              <span className="text-xs font-medium">{item.label}</span>
+            </button>
+          );
+        })}
       </div>
-    </nav>
+    </div>
   );
 };
 
