@@ -95,7 +95,7 @@ const DressUp = () => {
       
       if (item.category === 'accessories') {
         newState.accessories = [...prev.accessories, item];
-      } else if (item.category === 'dress') {
+      } else if (item.category === 'dresses') {
         // Dress replaces both top and bottom
         newState.dress = item;
         newState.top = null;
