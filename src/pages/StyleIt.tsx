@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { User, Users, Shirt, Palette, RotateCcw, Save, Share2, Heart } from "lucide-react";
+import { User, Users, Shirt, Palette, RotateCcw, Save, Share2, Heart, Sparkles, X } from "lucide-react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,8 @@ const StyleIt = () => {
   const [selectedGender, setSelectedGender] = useState<'female' | 'male'>('female');
   const [currentOutfit, setCurrentOutfit] = useState<StyledOutfit>({});
   const [selectedCategory, setSelectedCategory] = useState<string>('tops');
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedItem, setDraggedItem] = useState<ClothingItem | null>(null);
   const { toast } = useToast();
 
   // Sample clothing items from wishlist and shop
@@ -98,9 +100,19 @@ const StyleIt = () => {
       ...prev,
       [item.category]: item
     }));
+    
+    // Show sparkle animation
+    const avatar = document.querySelector('.avatar-container');
+    if (avatar) {
+      avatar.classList.add('animate-pulse');
+      setTimeout(() => {
+        avatar.classList.remove('animate-pulse');
+      }, 600);
+    }
+
     toast({
-      title: "Item Added",
-      description: `${item.name} has been added to your outfit`,
+      title: "✨ Item Added!",
+      description: `${item.name} looks amazing on ${selectedGender === 'female' ? 'Barbie' : 'Ken'}!`,
     });
   };
 
@@ -110,28 +122,55 @@ const StyleIt = () => {
       delete newOutfit[category];
       return newOutfit;
     });
+    
+    toast({
+      title: "Item Removed",
+      description: "Back to the wardrobe it goes!",
+    });
   };
 
   const handleSaveOutfit = () => {
     toast({
-      title: "Outfit Saved",
-      description: "Your styled outfit has been saved to your collection",
+      title: "💖 Outfit Saved!",
+      description: "Your fabulous look has been saved to your collection",
     });
   };
 
   const handleShareOutfit = () => {
     toast({
-      title: "Outfit Shared",
-      description: "Your outfit has been shared with the community",
+      title: "📸 Outfit Shared!",
+      description: "Your styling skills are now on display for everyone to see!",
     });
   };
 
   const handleResetOutfit = () => {
     setCurrentOutfit({});
     toast({
-      title: "Outfit Reset",
-      description: "Your outfit has been cleared",
+      title: "Fresh Start!",
+      description: "Time for a new look!",
     });
+  };
+
+  const handleDragStart = (item: ClothingItem) => {
+    setDraggedItem(item);
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (draggedItem) {
+      handleItemSelect(draggedItem);
+      handleDragEnd();
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
   };
 
   return (
@@ -147,33 +186,37 @@ const StyleIt = () => {
         <div className="px-4 pt-6 pb-4">
           <div className="max-w-6xl mx-auto">
             <h1 className="text-3xl font-playfair font-semibold text-gray-800 mb-2">
-              Style It
+              ✨ Style It
             </h1>
             <p className="text-gray-600 mb-6">
-              Mix and match your favorite pieces on virtual avatars
+              Dress up your avatar with fabulous outfits! Drag & drop or click to try on clothes
             </p>
 
             {/* Gender Selection */}
             <div className="flex items-center gap-4 mb-6">
-              <span className="text-gray-700 font-medium">Choose Avatar:</span>
+              <span className="text-gray-700 font-medium">Choose Your Model:</span>
               <div className="flex bg-white rounded-lg p-1 shadow-sm">
                 <button
                   onClick={() => setSelectedGender('female')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                    selectedGender === 'female' ? 'bg-pink-100 text-pink-600' : 'text-gray-600'
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-300 ${
+                    selectedGender === 'female' 
+                      ? 'bg-gradient-to-r from-pink-100 to-purple-100 text-pink-600 transform scale-105' 
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <User className="h-4 w-4" />
-                  Barbie
+                  💖 Barbie
                 </button>
                 <button
                   onClick={() => setSelectedGender('male')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                    selectedGender === 'male' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-300 ${
+                    selectedGender === 'male' 
+                      ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-600 transform scale-105' 
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <Users className="h-4 w-4" />
-                  Ken
+                  🕺 Ken
                 </button>
               </div>
             </div>
@@ -186,104 +229,176 @@ const StyleIt = () => {
             
             {/* Avatar Display */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-6 border-2 border-pink-100">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-playfair font-semibold text-gray-800">
-                    {selectedGender === 'female' ? 'Barbie' : 'Ken'} Avatar
+                  <h3 className="text-lg font-playfair font-semibold text-gray-800 flex items-center gap-2">
+                    {selectedGender === 'female' ? '💖 Barbie' : '🕺 Ken'} Avatar
+                    <Sparkles className="h-4 w-4 text-pink-500" />
                   </h3>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={handleResetOutfit}>
+                    <Button size="sm" variant="outline" onClick={handleResetOutfit} className="hover:bg-pink-50">
                       <RotateCcw className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={handleSaveOutfit}>
+                    <Button size="sm" variant="outline" onClick={handleSaveOutfit} className="hover:bg-pink-50">
                       <Save className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={handleShareOutfit}>
+                    <Button size="sm" variant="outline" onClick={handleShareOutfit} className="hover:bg-pink-50">
                       <Share2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
                 {/* Avatar Visualization */}
-                <div className="relative bg-gradient-to-b from-pink-50 to-purple-50 rounded-xl p-8 h-96 flex items-end justify-center">
+                <div 
+                  className={`avatar-container relative bg-gradient-to-br ${
+                    selectedGender === 'female' 
+                      ? 'from-pink-50 via-purple-50 to-rose-50' 
+                      : 'from-blue-50 via-cyan-50 to-indigo-50'
+                  } rounded-2xl p-8 h-96 flex items-center justify-center transition-all duration-500 ${
+                    isDragging ? 'border-4 border-dashed border-pink-300 bg-pink-50' : ''
+                  }`}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                >
+                  {/* Decorative Background Elements */}
+                  <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                    <div className="absolute top-4 right-4 text-pink-200 text-2xl animate-pulse">✨</div>
+                    <div className="absolute bottom-4 left-4 text-purple-200 text-xl animate-pulse">💫</div>
+                    <div className="absolute top-1/2 left-2 text-pink-200 text-lg animate-pulse">🌟</div>
+                  </div>
+
                   {/* Avatar Base */}
-                  <div className={`relative w-32 h-80 ${
+                  <div className={`relative w-32 h-72 ${
                     selectedGender === 'female' ? 'bg-pink-200' : 'bg-blue-200'
-                  } rounded-full opacity-30`}>
+                  } rounded-full opacity-20 transition-all duration-300`}>
                     {/* Head */}
-                    <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 ${
+                    <div className={`absolute -top-4 left-1/2 transform -translate-x-1/2 w-16 h-16 ${
                       selectedGender === 'female' ? 'bg-pink-300' : 'bg-blue-300'
-                    } rounded-full`} />
+                    } rounded-full opacity-30`} />
                   </div>
 
                   {/* Outfit Visualization */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    {currentOutfit.dress && (
-                      <div className="relative">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                    {/* Dress or Top/Bottom */}
+                    {currentOutfit.dress ? (
+                      <div className="relative group">
+                        <div className="absolute -inset-2 bg-gradient-to-r from-pink-300 to-purple-300 rounded-lg blur opacity-30 group-hover:opacity-50 transition-opacity"></div>
                         <img
                           src={currentOutfit.dress.image}
                           alt={currentOutfit.dress.name}
-                          className="w-24 h-32 object-cover rounded-lg shadow-lg"
+                          className="relative w-28 h-36 object-cover rounded-xl shadow-2xl border-2 border-white transform hover:scale-105 transition-all duration-300"
                         />
                         <button
                           onClick={() => handleRemoveItem('dress')}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                          className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs transform hover:scale-110 transition-all duration-200 shadow-lg"
                         >
-                          ×
+                          <X className="h-3 w-3" />
                         </button>
+                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white px-2 py-1 rounded-full text-xs font-medium text-gray-600 shadow-md">
+                          {currentOutfit.dress.name}
+                        </div>
                       </div>
-                    )}
-                    
-                    {!currentOutfit.dress && (
+                    ) : (
                       <>
+                        {/* Top */}
                         {currentOutfit.top && (
-                          <div className="relative mb-2">
+                          <div className="relative group mb-2">
+                            <div className="absolute -inset-2 bg-gradient-to-r from-pink-300 to-purple-300 rounded-lg blur opacity-30 group-hover:opacity-50 transition-opacity"></div>
                             <img
                               src={currentOutfit.top.image}
                               alt={currentOutfit.top.name}
-                              className="w-20 h-16 object-cover rounded-lg shadow-lg"
+                              className="relative w-24 h-20 object-cover rounded-lg shadow-2xl border-2 border-white transform hover:scale-105 transition-all duration-300"
                             />
                             <button
                               onClick={() => handleRemoveItem('top')}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs transform hover:scale-110 transition-all duration-200 shadow-lg"
                             >
-                              ×
+                              <X className="h-3 w-3" />
                             </button>
                           </div>
                         )}
                         
+                        {/* Bottom */}
                         {currentOutfit.bottom && (
-                          <div className="relative">
+                          <div className="relative group">
+                            <div className="absolute -inset-2 bg-gradient-to-r from-pink-300 to-purple-300 rounded-lg blur opacity-30 group-hover:opacity-50 transition-opacity"></div>
                             <img
                               src={currentOutfit.bottom.image}
                               alt={currentOutfit.bottom.name}
-                              className="w-20 h-16 object-cover rounded-lg shadow-lg"
+                              className="relative w-24 h-20 object-cover rounded-lg shadow-2xl border-2 border-white transform hover:scale-105 transition-all duration-300"
                             />
                             <button
                               onClick={() => handleRemoveItem('bottom')}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs transform hover:scale-110 transition-all duration-200 shadow-lg"
                             >
-                              ×
+                              <X className="h-3 w-3" />
                             </button>
                           </div>
                         )}
                       </>
                     )}
+
+                    {/* Accessories */}
+                    {currentOutfit.accessories && (
+                      <div className="absolute top-2 right-2">
+                        <img
+                          src={currentOutfit.accessories.image}
+                          alt={currentOutfit.accessories.name}
+                          className="w-8 h-8 object-cover rounded-full shadow-lg border border-white"
+                        />
+                      </div>
+                    )}
+
+                    {/* Shoes */}
+                    {currentOutfit.shoes && (
+                      <div className="absolute bottom-2">
+                        <img
+                          src={currentOutfit.shoes.image}
+                          alt={currentOutfit.shoes.name}
+                          className="w-12 h-8 object-cover rounded-lg shadow-lg border border-white"
+                        />
+                      </div>
+                    )}
+
+                    {/* Empty State */}
+                    {Object.keys(currentOutfit).length === 0 && (
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">👗</div>
+                        <p className="text-gray-400 text-sm">
+                          Drag clothes here or<br />click "Try On" below!
+                        </p>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Drop Zone Indicator */}
+                  {isDragging && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-pink-100/80 rounded-2xl border-4 border-dashed border-pink-400">
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">✨</div>
+                        <p className="text-pink-600 font-medium">Drop to try on!</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Current Outfit Summary */}
-                <div className="mt-4">
-                  <h4 className="font-medium text-gray-800 mb-2">Current Outfit</h4>
+                <div className="mt-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-4">
+                  <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-pink-500" />
+                    Current Look
+                  </h4>
                   <div className="space-y-1 text-sm text-gray-600">
                     {Object.entries(currentOutfit).map(([category, item]) => (
                       <div key={category} className="flex items-center justify-between">
-                        <span className="capitalize">{category}:</span>
-                        <span className="font-medium">{item.name}</span>
+                        <span className="capitalize font-medium">{category}:</span>
+                        <span className="text-pink-600">{item.name}</span>
                       </div>
                     ))}
                     {Object.keys(currentOutfit).length === 0 && (
-                      <p className="text-gray-400 italic">No items selected</p>
+                      <p className="text-gray-400 italic text-center py-2">
+                        Ready for a makeover! 💄
+                      </p>
                     )}
                   </div>
                 </div>
@@ -293,9 +408,13 @@ const StyleIt = () => {
             {/* Clothing Selection */}
             <div className="lg:col-span-2">
               <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-5 bg-white shadow-sm">
                   {categories.map(category => (
-                    <TabsTrigger key={category.id} value={category.id}>
+                    <TabsTrigger 
+                      key={category.id} 
+                      value={category.id}
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-100 data-[state=active]:to-purple-100 data-[state=active]:text-pink-600"
+                    >
                       {category.name}
                     </TabsTrigger>
                   ))}
@@ -307,19 +426,25 @@ const StyleIt = () => {
                       {getFilteredItems(category.id).map((item, index) => (
                         <div
                           key={item.id}
-                          onClick={() => handleItemSelect(item)}
-                          className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 animate-fade-in"
+                          draggable
+                          onDragStart={() => handleDragStart(item)}
+                          onDragEnd={handleDragEnd}
+                          className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-grab active:cursor-grabbing transform hover:scale-105 animate-fade-in group border-2 border-transparent hover:border-pink-200"
                           style={{ animationDelay: `${index * 100}ms` }}
                         >
-                          <div className="relative">
+                          <div className="relative overflow-hidden rounded-t-xl">
                             <img
                               src={item.image}
                               alt={item.name}
-                              className="w-full h-40 object-cover rounded-t-xl"
+                              className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-110"
                             />
-                            <button className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors">
-                              <Heart className="h-4 w-4 text-gray-600" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <button className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors transform hover:scale-110 duration-200">
+                              <Heart className="h-4 w-4 text-gray-600 hover:text-pink-500 transition-colors" />
                             </button>
+                            <div className="absolute top-2 left-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                              {category.name.slice(0, -1)}
+                            </div>
                           </div>
                           
                           <div className="p-3">
@@ -333,9 +458,10 @@ const StyleIt = () => {
                               </span>
                               <Button
                                 size="sm"
-                                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-xs px-3 py-1"
+                                onClick={() => handleItemSelect(item)}
+                                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-xs px-3 py-1 transform hover:scale-105 transition-all duration-200 shadow-lg"
                               >
-                                Try On
+                                ✨ Try On
                               </Button>
                             </div>
                           </div>
@@ -345,7 +471,7 @@ const StyleIt = () => {
                     
                     {getFilteredItems(category.id).length === 0 && (
                       <div className="text-center py-12">
-                        <Palette className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                        <div className="text-6xl mb-4">👗</div>
                         <h3 className="text-lg font-medium text-gray-800 mb-2">
                           No {category.name} Available
                         </h3>
