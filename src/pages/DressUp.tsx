@@ -1,13 +1,13 @@
 
 import { useState, useRef } from "react";
-import { Download, RotateCcw, Sparkles, Heart } from "lucide-react";
+import { Sparkles, Heart } from "lucide-react";
 import Header from "../components/Header";
 import BottomNav from "../components/BottomNav";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import AvatarCanvas from "../components/DressUp/AvatarCanvas";
-import ClothingPanel from "../components/DressUp/ClothingPanel";
+import GenderSelector from "../components/DressUp/GenderSelector";
+import ActionButtons from "../components/DressUp/ActionButtons";
+import CategoryTabs from "../components/DressUp/CategoryTabs";
 import { ClothingItem, AvatarState, ClothingCategory } from "../types/dressup";
 
 const DressUp = () => {
@@ -140,12 +140,6 @@ const DressUp = () => {
     });
   };
 
-  const getFilteredItems = (category: ClothingCategory) => {
-    return clothingItems.filter(item => 
-      item.category === category && item.gender === selectedGender
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 relative font-inter">
       {/* Magical Background Effects */}
@@ -173,34 +167,10 @@ const DressUp = () => {
               Create magical looks for your avatar! Drag and drop items or click to apply them ✨
             </p>
 
-            {/* Avatar Selection */}
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-gray-700 font-medium">Choose Avatar:</span>
-              <div className="flex bg-white rounded-xl p-1 shadow-lg">
-                <button
-                  onClick={() => setSelectedGender('barbie')}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-300 ${
-                    selectedGender === 'barbie' 
-                      ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg transform scale-105' 
-                      : 'text-gray-600 hover:bg-pink-50'
-                  }`}
-                >
-                  <span className="text-2xl">👸</span>
-                  <span className="font-medium">Barbie</span>
-                </button>
-                <button
-                  onClick={() => setSelectedGender('ken')}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-300 ${
-                    selectedGender === 'ken' 
-                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg transform scale-105' 
-                      : 'text-gray-600 hover:bg-blue-50'
-                  }`}
-                >
-                  <span className="text-2xl">🤴</span>
-                  <span className="font-medium">Ken</span>
-                </button>
-              </div>
-            </div>
+            <GenderSelector 
+              selectedGender={selectedGender}
+              onGenderChange={setSelectedGender}
+            />
           </div>
         </div>
 
@@ -216,24 +186,10 @@ const DressUp = () => {
                     <Heart className="h-5 w-5 text-pink-500" />
                     {selectedGender === 'barbie' ? 'Barbie' : 'Ken'}
                   </h3>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={handleReset}
-                      className="hover:bg-red-50 hover:border-red-200"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={handleDownload}
-                      className="hover:bg-green-50 hover:border-green-200"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <ActionButtons 
+                    onReset={handleReset}
+                    onDownload={handleDownload}
+                  />
                 </div>
 
                 <AvatarCanvas
@@ -249,34 +205,16 @@ const DressUp = () => {
             {/* Clothing Panel */}
             <div className="lg:col-span-2 order-1 lg:order-2">
               <div className="bg-white rounded-3xl shadow-2xl p-6">
-                <Tabs value={selectedCategory} onValueChange={(value) => setSelectedCategory(value as ClothingCategory)} className="w-full">
-                  <TabsList className="grid w-full grid-cols-6 bg-gradient-to-r from-pink-100 to-purple-100 p-1 rounded-2xl mb-6">
-                    {categories.map(category => (
-                      <TabsTrigger 
-                        key={category.id} 
-                        value={category.id}
-                        className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-lg transition-all duration-300"
-                      >
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-lg">{category.icon}</span>
-                          <span className="text-xs font-medium hidden sm:block">{category.name}</span>
-                        </div>
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                  
-                  {categories.map(category => (
-                    <TabsContent key={category.id} value={category.id}>
-                      <ClothingPanel
-                        items={getFilteredItems(category.id)}
-                        onItemSelect={handleItemDrop}
-                        onDragStart={() => setIsDragging(true)}
-                        onDragEnd={() => setIsDragging(false)}
-                        category={category}
-                      />
-                    </TabsContent>
-                  ))}
-                </Tabs>
+                <CategoryTabs
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                  categories={categories}
+                  clothingItems={clothingItems}
+                  selectedGender={selectedGender}
+                  onItemSelect={handleItemDrop}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
+                />
               </div>
             </div>
           </div>
