@@ -2,17 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/6a81cbec-49e1-4927-89d6-ab5d60af74e5
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/6a81cbec-49e1-4927-89d6-ab5d60af74e5) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+**URL**: https://ootdai.lovable.app/shop
 
 **Use your preferred IDE**
 
